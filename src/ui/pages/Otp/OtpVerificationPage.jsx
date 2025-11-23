@@ -1,9 +1,6 @@
-// src/ui/pages/Otp/OtpVerificationPage.jsx
-
 import { useState, useRef } from "react";
 import {
   Box,
-  Paper,
   TextField,
   Button,
   Typography,
@@ -11,25 +8,26 @@ import {
   Stack,
 } from "@mui/material";
 import { Verified, Dialpad } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+
+import AuthCard from "../../components/AuthCard";
 
 const OTP_LENGTH = 6;
 
 export default function OtpVerificationPage() {
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
   const inputsRef = useRef([]);
+  const navigate = useNavigate();
 
   const handleChange = (index, value) => {
-    // خليه بس أرقام
     const sanitized = value.replace(/\D/g, "");
-
     if (!sanitized) return;
 
     const newOtp = [...otp];
-    newOtp[index] = sanitized.charAt(0); // أول رقم بس
+    newOtp[index] = sanitized.charAt(0);
     setOtp(newOtp);
 
-    // روح عالخانة اللي بعدها تلقائياً
     if (index < OTP_LENGTH - 1 && inputsRef.current[index + 1]) {
       inputsRef.current[index + 1].focus();
     }
@@ -38,17 +36,14 @@ export default function OtpVerificationPage() {
   const handleKeyDown = (index, e) => {
     if (e.key === "Backspace") {
       if (otp[index]) {
-        // فضّي الخانة الحالية
         const newOtp = [...otp];
         newOtp[index] = "";
         setOtp(newOtp);
       } else if (index > 0 && inputsRef.current[index - 1]) {
-        // ارجع للخانة اللي قبلها
         inputsRef.current[index - 1].focus();
       }
     }
 
-    // تنقل بأسهم الكيبورد
     if (e.key === "ArrowLeft" && index > 0) {
       inputsRef.current[index - 1]?.focus();
     }
@@ -68,7 +63,6 @@ export default function OtpVerificationPage() {
     }
     setOtp(newOtp);
 
-    // ركّز عآخر خانة فيها رقم
     const lastIndex = Math.min(pasted.length, OTP_LENGTH) - 1;
     if (lastIndex >= 0 && inputsRef.current[lastIndex]) {
       inputsRef.current[lastIndex].focus();
@@ -84,9 +78,12 @@ export default function OtpVerificationPage() {
       return;
     }
 
-    // هون لاحقاً رح نستدعي useCase + TanStack Mutation
+    // لاحقاً: استبدلها بـ useAppMutation + verifyOtp useCase
     console.log("OTP code:", code);
-    toast.success("تم إدخال الرمز بنجاح (بدون ربط حالياً)");
+    toast.success("تم تأكيد الرمز (وهمي حالياً)");
+
+    // ممكن بعدين:
+    // navigate("/reset-password");
   };
 
   return (
@@ -97,39 +94,32 @@ export default function OtpVerificationPage() {
         alignItems: "center",
         justifyContent: "center",
         bgcolor: "background.default",
+        px: 2,
       }}
     >
-      <Paper
-        elevation={3}
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 420,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-          <Avatar sx={{ bgcolor: "primary.main" }}>
+      <AuthCard>
+        <Box sx={{ textAlign: "center" }}>
+          <Avatar
+            sx={{
+              bgcolor: "primary.main",
+              width: 56,
+              height: 56,
+              margin: "0 auto",
+            }}
+          >
             <Verified />
           </Avatar>
+
+          <Typography variant="h5" mt={2} fontWeight={600}>
+            تأكيد الرمز
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" mt={1}>
+            أدخل رمز التحقق المكوّن من 6 أرقام
+          </Typography>
         </Box>
 
-        <Typography variant="h5" align="center" fontWeight={600}>
-          تأكيد الرمز
-        </Typography>
-
-        <Typography
-          variant="body2"
-          align="center"
-          color="text.secondary"
-          sx={{ mb: 1 }}
-        >
-          أدخل رمز التحقق المكوّن من 6 أرقام
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
           <Stack
             direction="row"
             justifyContent="center"
@@ -162,15 +152,23 @@ export default function OtpVerificationPage() {
           </Stack>
 
           <Button
-            type="submit"
             fullWidth
+            type="submit"
             variant="contained"
             startIcon={<Dialpad />}
           >
             تأكيد الرمز
           </Button>
-        </Box>
-      </Paper>
+
+          <Button
+            fullWidth
+            sx={{ mt: 1 }}
+            onClick={() => navigate("/forgot-password")}
+          >
+            العودة إلى استعادة كلمة المرور
+          </Button>
+        </form>
+      </AuthCard>
     </Box>
   );
 }

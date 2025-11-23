@@ -1,9 +1,6 @@
-// src/ui/pages/ResetPassword/ResetPasswordPage.jsx
-
 import { useState } from "react";
 import {
   Box,
-  Paper,
   TextField,
   Button,
   Typography,
@@ -11,14 +8,23 @@ import {
   IconButton,
   InputAdornment,
 } from "@mui/material";
-import { Lock, LockReset, Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+  Lock,
+  LockReset,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+
+import AuthCard from "../../components/AuthCard";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -38,9 +44,12 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    // بدون ربط لسا – لاحقاً رح نحط TanStack Mutation
-    console.log("New Password:", password);
-    toast.success("تم تغيير كلمة المرور بنجاح (من غير ربط حالياً)");
+    // لاحقاً: استبدلها بـ useAppMutation + resetPassword useCase
+    console.log("New password:", password);
+    toast.success("تم تغيير كلمة المرور (وهمي حالياً)");
+
+    // ممكن بعدين:
+    // navigate("/login");
   };
 
   return (
@@ -51,47 +60,38 @@ export default function ResetPasswordPage() {
         alignItems: "center",
         justifyContent: "center",
         bgcolor: "background.default",
+        px: 2,
       }}
     >
-      <Paper
-        elevation={3}
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 420,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        {/* Icon */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-          <Avatar sx={{ bgcolor: "primary.main" }}>
+      <AuthCard>
+        <Box sx={{ textAlign: "center" }}>
+          <Avatar
+            sx={{
+              bgcolor: "primary.main",
+              width: 56,
+              height: 56,
+              margin: "0 auto",
+            }}
+          >
             <LockReset />
           </Avatar>
+
+          <Typography variant="h5" mt={2} fontWeight={600}>
+            تعيين كلمة مرور جديدة
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" mt={1}>
+            أدخل كلمة مرور جديدة وقم بتأكيدها
+          </Typography>
         </Box>
 
-        <Typography variant="h5" align="center" fontWeight={600}>
-          تعيين كلمة مرور جديدة
-        </Typography>
-
-        <Typography
-          variant="body2"
-          align="center"
-          color="text.secondary"
-          sx={{ mb: 1 }}
-        >
-          يرجى إدخال كلمة مرور جديدة وتأكيدها
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          {/* حقل كلمة السر */}
+        <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
           <TextField
-            label="كلمة المرور الجديدة"
             fullWidth
-            margin="normal"
+            label="كلمة المرور الجديدة"
             type={showPassword ? "text" : "password"}
             value={password}
+            margin="normal"
             onChange={(e) => setPassword(e.target.value)}
             InputProps={{
               startAdornment: (
@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
               ),
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword((p) => !p)}>
+                  <IconButton onClick={() => setShowPassword((prev) => !prev)}>
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
@@ -109,13 +109,12 @@ export default function ResetPasswordPage() {
             }}
           />
 
-          {/* تأكيد كلمة السر */}
           <TextField
-            label="تأكيد كلمة المرور"
             fullWidth
-            margin="normal"
+            label="تأكيد كلمة المرور"
             type={showConfirm ? "text" : "password"}
             value={confirm}
+            margin="normal"
             onChange={(e) => setConfirm(e.target.value)}
             InputProps={{
               startAdornment: (
@@ -125,7 +124,7 @@ export default function ResetPasswordPage() {
               ),
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={() => setShowConfirm((p) => !p)}>
+                  <IconButton onClick={() => setShowConfirm((prev) => !prev)}>
                     {showConfirm ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
@@ -133,11 +132,15 @@ export default function ResetPasswordPage() {
             }}
           />
 
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
+          <Button fullWidth type="submit" variant="contained" sx={{ mt: 3 }}>
             حفظ كلمة المرور الجديدة
           </Button>
-        </Box>
-      </Paper>
+
+          <Button fullWidth sx={{ mt: 1 }} onClick={() => navigate("/login")}>
+            العودة إلى تسجيل الدخول
+          </Button>
+        </form>
+      </AuthCard>
     </Box>
   );
 }

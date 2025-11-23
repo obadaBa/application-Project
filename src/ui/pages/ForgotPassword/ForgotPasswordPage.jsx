@@ -1,9 +1,6 @@
-// src/ui/pages/ForgotPassword/ForgotPasswordPage.jsx
-
 import { useState } from "react";
 import {
   Box,
-  Paper,
   TextField,
   Button,
   Typography,
@@ -11,22 +8,30 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Email, LockReset } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+
+import AuthCard from "../../components/AuthCard";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    navigate("/verify-code");
 
     if (!email) {
       toast.warning("يرجى إدخال البريد الإلكتروني");
       return;
     }
 
-    // بدون ربط – بس لحتى تجهز API لاحقاً
-    toast.success("تم إرسال طلب استعادة كلمة المرور");
-    console.log("Email sent:", email);
+    // لاحقاً: استبدلها بـ useAppMutation + sendResetCode useCase
+    console.log("Request reset code for:", email);
+    toast.success("تم إرسال رمز التحقق إلى بريدك الإلكتروني (وهمي حالياً)");
+
+    // ممكن بعدين تروح ع صفحة OTP:
+    // navigate("/verify-code");
   };
 
   return (
@@ -37,40 +42,38 @@ export default function ForgotPasswordPage() {
         alignItems: "center",
         justifyContent: "center",
         bgcolor: "background.default",
+        px: 2,
       }}
     >
-      <Paper
-        elevation={3}
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 400,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-          <Avatar sx={{ bgcolor: "primary.main" }}>
+      <AuthCard>
+        <Box sx={{ textAlign: "center" }}>
+          <Avatar
+            sx={{
+              bgcolor: "primary.main",
+              width: 56,
+              height: 56,
+              margin: "0 auto",
+            }}
+          >
             <LockReset />
           </Avatar>
+
+          <Typography variant="h5" mt={2} fontWeight={600}>
+            استعادة كلمة المرور
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" mt={1}>
+            أدخل بريدك الإلكتروني لإرسال رمز التحقق
+          </Typography>
         </Box>
 
-        <Typography variant="h5" align="center" fontWeight={600}>
-          استعادة كلمة المرور
-        </Typography>
-
-        <Typography variant="body2" align="center" color="text.secondary">
-          أدخل بريدك الإلكتروني لإرسال رمز التحقق
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+        <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
           <TextField
+            fullWidth
             label="البريد الإلكتروني"
             type="email"
-            fullWidth
-            margin="normal"
             value={email}
+            margin="normal"
             onChange={(e) => setEmail(e.target.value)}
             InputProps={{
               startAdornment: (
@@ -81,11 +84,15 @@ export default function ForgotPasswordPage() {
             }}
           />
 
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
+          <Button fullWidth type="submit" variant="contained" sx={{ mt: 2 }}>
             إرسال رمز التحقق
           </Button>
-        </Box>
-      </Paper>
+
+          <Button fullWidth sx={{ mt: 1 }} onClick={() => navigate("/login")}>
+            العودة إلى تسجيل الدخول
+          </Button>
+        </form>
+      </AuthCard>
     </Box>
   );
 }

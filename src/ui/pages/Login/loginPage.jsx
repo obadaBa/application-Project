@@ -2,7 +2,6 @@
 import { useState } from "react";
 import {
   Box,
-  Paper,
   TextField,
   Button,
   Typography,
@@ -17,49 +16,40 @@ import {
   VisibilityOff,
 } from "@mui/icons-material";
 
-
-import { toast } from "react-toastify";
-import { loginUser } from "../../../domain/user/useCases/loginUser";
 import { useNavigate } from "react-router-dom";
 import { useAppMutation } from "../../hooks/useAppMutation";
+import { loginUser } from "../../../domain/user/useCases/loginUser";
+
+import AuthCard from "../../components/AuthCard";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
- const loginMutation = useAppMutation({
-  mutationFn: ({ username, password }) => loginUser(username, password),
-  successMessage: "تم تسجيل الدخول بنجاح ✨", // رسالة نجاح جاهزة من الـ Aspect
+  const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  // لو بدك منطق إضافي على النجاح (غير التوست):
-  onSuccess: (data) => {
-    // مثال: خزن التوكن أو روح على صفحة تانية
-    // localStorage.setItem("token", data.token);
-    // navigate("/dashboard");
-    console.log("Logged in:", data);
-  },
+  // AOP Mutation
+  const loginMutation = useAppMutation({
+    mutationFn: ({ username, password }) => loginUser(username, password),
 
-  // onError اختياري إذا بدك شي غير التوست
-  // onError: (error) => { ... }
-});
+    successMessage: "تم تسجيل الدخول بنجاح ✨",
 
+    onSuccess: (data) => {
+      // هون لح تخزن التوكن أو تنتقل دايركت حسب مشروعك
+      // localStorage.setItem("token", data.token);
+      console.log("Logged in:", data);
+    },
+  });
 
   const handleSubmit = (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!username || !password) {
-    toast.warning("يرجى إدخال اسم المستخدم وكلمة السر");
-    return;
-  }
+    if (!username || !password) {
+    }
 
-  loginMutation.mutate({ username, password });
-};
-
-
-
-  const isLoading = loginMutation.isPending;
+    loginMutation.mutate({ username, password });
+  };
 
   return (
     <Box
@@ -69,40 +59,40 @@ export default function LoginPage() {
         alignItems: "center",
         justifyContent: "center",
         bgcolor: "background.default",
+        px: 2,
       }}
     >
-      <Paper
-        elevation={3}
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 400,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-          <Avatar sx={{ bgcolor: "primary.main" }}>
+      <AuthCard>
+        {/* اللوجو */}
+        <Box sx={{ textAlign: "center" }}>
+          <Avatar
+            sx={{
+              bgcolor: "primary.main",
+              width: 56,
+              height: 56,
+              margin: "0 auto",
+            }}
+          >
             <LockOutlined />
           </Avatar>
+
+          <Typography variant="h5" mt={2} fontWeight={600}>
+            تسجيل الدخول
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" mt={1}>
+            الرجاء إدخال اسم المستخدم وكلمة السر
+          </Typography>
         </Box>
-        
-        <Typography variant="h5" align="center" fontWeight={600}>
-          تسجيل الدخول
-        </Typography>
 
-        <Typography variant="body2" align="center" color="text.secondary">
-          أدخل اسم المستخدم وكلمة السر للمتابعة
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
+        {/* الفورم */}
+        <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
           <TextField
-            label="اسم المستخدم"
             fullWidth
-            margin="normal"
+            label="اسم المستخدم"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            margin="normal"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -113,12 +103,12 @@ export default function LoginPage() {
           />
 
           <TextField
-            label="كلمة السر"
             fullWidth
-            margin="normal"
+            label="كلمة السر"
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            margin="normal"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -127,37 +117,34 @@ export default function LoginPage() {
               ),
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    edge="end"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
+                  <IconButton onClick={() => setShowPassword((prev) => !prev)}>
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
           />
-          <Typography
-          variant="body2"
-          sx={{ mt: 1, textAlign: "right", cursor: "pointer" }}
-          color="primary"
-          onClick={() => navigate("/forgot-password")}
-        >
-          نسيت كلمة المرور؟
-        </Typography>
-
 
           <Button
-            type="submit"
             fullWidth
+            type="submit"
             variant="contained"
             sx={{ mt: 3 }}
-            disabled={isLoading}
+            disabled={loginMutation.isPending}
           >
-            {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+            {loginMutation.isPending ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
           </Button>
-        </Box>
-      </Paper>
+
+          {/* زر نسيان كلمة المرور */}
+          <Button
+            fullWidth
+            sx={{ mt: 1 }}
+            onClick={() => navigate("/forgot-password")}
+          >
+            نسيت كلمة المرور؟
+          </Button>
+        </form>
+      </AuthCard>
     </Box>
   );
 }
